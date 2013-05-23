@@ -10,9 +10,14 @@ public class MyGenerator implements Generator {
     protected ProgressTicket progress;
     protected boolean cancel = false;
     
+    
+    static String urls;
+    static int depth;
+    
     @Override
     public void generate(ContainerLoader cl) {
-        WikiExtractor.generate(cl);
+        String urls_filtered[] = urls.split(",");
+        WikiExtractor.generate(cl,urls_filtered,depth);
     }
 
     @Override
@@ -22,7 +27,8 @@ public class MyGenerator implements Generator {
 
     @Override
     public GeneratorUI getUI() {
-        return null; //To change body of generated methods, choose Tools | Templates.
+        WikiUI frame = new WikiUI();
+        return frame;
     }
 
     @Override

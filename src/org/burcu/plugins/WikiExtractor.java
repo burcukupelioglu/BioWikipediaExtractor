@@ -4,11 +4,13 @@
  */
 package org.burcu.plugins;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gephi.io.importer.api.ContainerLoader;
@@ -17,21 +19,26 @@ import org.gephi.io.importer.api.NodeDraft;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
 /**
  *
  * @author Burcu
  */
 public class WikiExtractor {
-    static int maxdepth = 3;
+    static int maxdepth = 0;//SLIDER
     
-    static public void generate(ContainerLoader container) {
+    static public void generate(ContainerLoader container,String urls[],int indepth) {
+        maxdepth = indepth;
+        
+        
         ArrayList<WikiTodo> todo = new ArrayList<WikiTodo>();
         ArrayList<WikiLink> links = new ArrayList<WikiLink>();
         HashMap<String,NodeDraft> explored = new HashMap<String,NodeDraft>();
+        List<String> explored_nonbio = new ArrayList<String>();
         
-        WikiTodo init = new WikiTodo(null,"http://en.wikipedia.org/wiki/Aart_Kemink",0);
-        todo.add(init);
+        for(String url : urls){
+            WikiTodo init = new WikiTodo(null,url,0);//TEXTBOX
+            todo.add(init);
+        }
         
         while(!todo.isEmpty()){
             WikiTodo t = todo.get(0);
@@ -41,14 +48,20 @@ public class WikiExtractor {
             
             if (explored.containsKey(t.to)){
                 WikiLink a = new WikiLink(t.from,t.to);
-                if(t.from != null && !WikiLink.searchLink(links, a)){
+                if(t.from != null){// && !WikiLink.searchLink(links, a)){
+                    
                     links.add(a);
                     EdgeDraft e = container.factory().newEdgeDraft();
                     e.setSource(explored.get(t.from));
                     e.setTarget(explored.get(t.to));
-                    
+                    e.setWeight(1.0f);
                     container.addEdge(e);
                 }
+                todo.remove(0);
+                continue;
+            }
+            
+            if(explored_nonbio.contains(t.to)){
                 todo.remove(0);
                 continue;
             }
@@ -56,13 +69,16 @@ public class WikiExtractor {
             Document doc;
             try {
                 doc = Jsoup.connect(t.to).get();
-            } catch (IOException ex) {
+                doc.select("div[style*=display:none]").remove();
+                doc.select("span[style*=display:none]").remove();
+            } catch (IOException ex){
                 todo.remove(0);
                 //Logger.getLogger(WikiExtractor.class.getName()).log(Level.SEVERE, null, ex);
                 continue;
             }
             
             if (doc.getElementById("persondata") == null) {
+                explored_nonbio.add(t.to);
                 todo.remove(0);
                 continue;
             }
@@ -70,7 +86,14 @@ public class WikiExtractor {
             NodeDraft n1 = container.factory().newNodeDraft();
             String labelstr = doc.getElementsByTag("title").html().toString();
             labelstr = labelstr.substring(0,labelstr.lastIndexOf("-"));
-            n1.setLabel(labelstr);
+            n1.setLabel(labelstr); 
+            if(t.depth==0){
+                n1.setColor(Color.CYAN);
+            }else if(t.depth==maxdepth){
+                n1.setColor(Color.ORANGE);
+            }else{
+                n1.setColor(Color.DARK_GRAY);
+            }
             container.addNode(n1);
             
             explored.put(t.to, n1);
@@ -104,7 +127,7 @@ public class WikiExtractor {
                 EdgeDraft e = container.factory().newEdgeDraft();
                 e.setSource(explored.get(t.from));
                 e.setTarget(explored.get(t.to));
-
+                e.setWeight(1.0f);
                 container.addEdge(e);
             }
             
