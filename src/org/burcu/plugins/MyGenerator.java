@@ -22,7 +22,7 @@ public class MyGenerator implements Generator {
 
     @Override
     public String getName() {
-        return "Wikipedia Extractor"; //To change body of generated methods, choose Tools | Templates.
+        return "Bio Wikipedia Extractor"; //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
