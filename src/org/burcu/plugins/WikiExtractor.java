@@ -20,20 +20,31 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 /**
- *
+ * Creates a network from a given Wikipedia biography webpage. Extracts all the urls
+ * contained in the page, filters them to explore biographical ones. Each node represent
+ * a person and is linked with other nodes if an other node is referenced in the current one.
+ * 
+ * Hidden links,  
+ * 
  * @author Burcu
+ * @version beta 0.1
  */
 public class WikiExtractor {
     static int maxdepth = 0;//SLIDER
     
+    /**
+     * 
+     * @param container contains nodes and edges
+     * @param urls an array list of Wikipedia biography urls 
+     * @param indepth 
+     */
     static public void generate(ContainerLoader container,String urls[],int indepth) {
         maxdepth = indepth;
         
         
         ArrayList<WikiTodo> todo = new ArrayList<WikiTodo>();
-        ArrayList<WikiLink> links = new ArrayList<WikiLink>();
-        HashMap<String,NodeDraft> explored = new HashMap<String,NodeDraft>();
-        List<String> explored_nonbio = new ArrayList<String>();
+        HashMap<String,NodeDraft> explored = new HashMap<String,NodeDraft>(); //biography urls
+        List<String> explored_nonbio = new ArrayList<String>(); //all extracted urls 
         
         for(String url : urls){
             WikiTodo init = new WikiTodo(null,url,0);//TEXTBOX
@@ -47,10 +58,9 @@ public class WikiExtractor {
                 break;
             
             if (explored.containsKey(t.to)){
-                WikiLink a = new WikiLink(t.from,t.to);
-                if(t.from != null){// && !WikiLink.searchLink(links, a)){
-                    
-                    links.add(a);
+                
+                if(t.from != null){
+
                     EdgeDraft e = container.factory().newEdgeDraft();
                     e.setSource(explored.get(t.from));
                     e.setTarget(explored.get(t.to));
@@ -77,7 +87,7 @@ public class WikiExtractor {
                 continue;
             }
             
-            if (doc.getElementById("persondata") == null) {
+            if (doc.getElementById("persondata") == null) { //biography check
                 explored_nonbio.add(t.to);
                 todo.remove(0);
                 continue;
@@ -121,9 +131,8 @@ public class WikiExtractor {
                 }
             }
             
-            WikiLink a = new WikiLink(t.from, t.to);
-            if (t.from != null && !WikiLink.searchLink(links, a)) {
-                links.add(a);
+            
+            if (t.from != null) {
                 EdgeDraft e = container.factory().newEdgeDraft();
                 e.setSource(explored.get(t.from));
                 e.setTarget(explored.get(t.to));
