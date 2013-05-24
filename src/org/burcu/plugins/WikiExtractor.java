@@ -24,8 +24,8 @@ import org.jsoup.nodes.Element;
  * contained in the page, filters them to explore biographical ones. Each node represent
  * a person and is linked with other nodes if an other node is referenced in the current one.
  * 
- * Hidden links,  
- * 
+ * Only the main context in the article is parsed. Hidden links, referencal and categorical
+ * links are eliminated 
  * @author Burcu
  * @version beta 0.1
  */
