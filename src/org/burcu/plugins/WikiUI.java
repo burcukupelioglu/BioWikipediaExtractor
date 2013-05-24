@@ -10,7 +10,7 @@ import org.gephi.io.generator.spi.GeneratorUI;
 
 /**
  *
- * @author Guest
+ * @author Burcu
  */
 public class WikiUI implements GeneratorUI{
     private WikiPanel panel;

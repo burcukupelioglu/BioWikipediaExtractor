@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 
 /**
  *
- * @author Guest
+ * @author Burcu
  */
 public class WikiPanel extends javax.swing.JPanel {
 
